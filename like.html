@@ -1,1 +1,1120 @@
+<!-- Save as ecofinds-dashboard.html and open in your browser -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EcoFinds — Dashboard</title>
+  <meta name="color-scheme" content="light dark">
+  <style>
+   
+    :root{
+      --teal: #2c7a7b;
+      --green: #38a169;
+      --muted: #6b7280;
+      --bg: #f4f7f6;
+      --card: #ffffff;
+      --soft: #edf2f7;
+      --danger: #ef4444;
+      --glass: rgba(255,255,255,0.7);
+      --shadow: 0 8px 28px rgba(9,30,20,0.06);
+      --radius: 12px;
+      --max-width: 1200px;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      color-scheme: light;
+    }
 
+    /* Dark mode variables (will be toggled by .dark on body) */
+    body.dark {
+      --bg: #0b1220;
+      --card: #07121a;
+      --soft: #072022;
+      --muted: #9aa7a1;
+      color-scheme: dark;
+    }
+
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,var(--bg), #eaf7f0);color:#042014;}
+    .app {
+      max-width: var(--max-width);
+      margin: 18px auto;
+      padding: 18px;
+    }
+
+    /* Header */
+    header {
+      display:flex;
+      gap:16px;
+      align-items:center;
+      justify-content:space-between;
+      background: linear-gradient(90deg,var(--card), rgba(255,255,255,0.9));
+      padding:12px 16px;
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 12px;
+      z-index: 50;
+    }
+    .brand{display:flex;align-items:center;gap:12px}
+    .logo{
+      width:44px;height:44px;border-radius:10px;background:linear-gradient(135deg,var(--teal),var(--green));display:flex;align-items:center;justify-content:center;color:white;font-weight:800;
+      box-shadow:0 6px 18px rgba(11,143,107,0.12); font-size:18px;
+    }
+    .brand h1{font-size:1.1rem;margin:0}
+    .nav {
+      display:flex; gap:12px; align-items:center;
+    }
+    .search-bar { display:flex; align-items:center; gap:8px; background:var(--soft); padding:6px; border-radius:10px; width:420px; max-width:40vw; }
+    .search-bar input { border:0;background:transparent;outline:none;padding:6px 8px; width:100%; font-size:14px; color:inherit; }
+    .icon-btn { background:transparent;border:0;padding:8px;border-radius:8px;cursor:pointer; color:var(--teal); }
+    .icon-btn:hover { background: rgba(0,0,0,0.04); }
+    .notify-bell { position:relative; }
+    .notify-badge { position:absolute; top:2px; right:2px; background:var(--danger); color:white; font-size:11px; padding:2px 6px; border-radius:999px; }
+    .profile-mini { display:flex; gap:8px; align-items:center; cursor:pointer; }
+    .avatar { width:36px; height:36px; border-radius:999px; background:#cfeee0; display:flex; align-items:center; justify-content:center; font-weight:700; color:#044331; }
+
+    /* Layout */
+    .main { display:grid; grid-template-columns: 320px 1fr; gap:18px; margin-top:18px; align-items:start; }
+    @media(max-width:1000px){ .main { grid-template-columns: 1fr; } .search-bar { max-width:220px; } }
+
+    /* Left column (controls) */
+    .left .panel { position:sticky; top:84px; } /* keep filters visible */
+
+    .panel {
+      background:var(--card);
+      padding:12px;
+      border-radius:var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .section-title { font-weight:700; color:var(--teal); margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; }
+
+    /* Profile card */
+    .profile-card { display:flex; gap:12px; align-items:center; padding:12px; border-radius:10px; }
+    .profile-info { flex:1; }
+    .profile-info .name { font-weight:700; margin-bottom:4px; }
+    .profile-actions { display:flex; gap:8px; margin-top:8px; }
+    .small-muted{ color:var(--muted); font-size:13px; }
+
+    /* Eco meter */
+    .eco-meter { background:linear-gradient(90deg, rgba(56,161,105,0.09), rgba(44,122,123,0.03)); padding:12px; border-radius:10px; margin-top:12px; }
+    .eco-meter .bar { background: rgba(0,0,0,0.05); border-radius:10px; overflow:hidden; height:18px; }
+    .eco-meter .fill { height:18px; width:0%; background: linear-gradient(90deg,var(--green),var(--teal)); color:white; text-align:center; font-weight:700; font-size:12px; transition: width 900ms ease-in-out; }
+
+    /* Categories */
+    .categories { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:10px; }
+    .cat { padding:10px; border-radius:10px; background:linear-gradient(180deg, rgba(255,255,255,0.85), var(--soft)); display:flex; gap:10px; align-items:center; cursor:pointer; border:1px solid rgba(0,0,0,0.03); transition:transform .18s, box-shadow .18s; }
+    .cat:hover { transform:translateY(-6px); box-shadow: 0 10px 30px rgba(5,35,20,0.06); }
+    .cat .emoji { font-size:20px; }
+
+    /* Featured slider */
+    .featured { position:relative; overflow:hidden; border-radius:10px; padding:8px; display:flex; gap:10px; align-items:center; }
+    .carousel { display:flex; gap:12px; transition: transform 600ms ease; will-change: transform; }
+    .feat-card { min-width:220px; background:linear-gradient(180deg,#fff,#fbfffb); border-radius:12px; padding:10px; box-shadow:0 6px 18px rgba(9,58,39,0.04); display:flex; flex-direction:column; gap:8px; }
+    .feat-card img { width:100%; height:120px; object-fit:cover; border-radius:8px; }
+
+    /* Product listings grid */
+    .product-controls { display:flex; gap:12px; align-items:center; justify-content:space-between; margin-bottom:12px; flex-wrap:wrap; }
+    .filters { display:flex; gap:8px; align-items:center; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr)); gap:12px; }
+    .product { background: linear-gradient(180deg,#fff,#fbfffb); border-radius:12px; padding:10px; box-shadow:0 8px 20px rgba(11,66,45,0.04); display:flex; flex-direction:column; gap:8px; transition: transform .18s, box-shadow .18s; }
+    .product:hover { transform: translateY(-8px); box-shadow: 0 20px 40px rgba(10,80,60,0.08); }
+    .product img { width:100%; height:140px; object-fit:cover; border-radius:8px; }
+    .product .title { font-weight:700; font-size:15px; color:#083; min-height:42px; }
+    .product .meta { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+    .price { font-weight:800; color: #064; }
+    .price-old { text-decoration: line-through; color: #818181; font-weight:600; font-size:13px; }
+    .rating { display:flex; gap:4px; align-items:center; color: #f6b93b; }
+
+    .product .actions { display:flex; gap:8px; margin-top:6px; }
+    .btn { padding:8px 10px; border-radius:10px; border:0; cursor:pointer; font-weight:700; }
+    .btn-primary { background: linear-gradient(90deg,var(--teal),var(--green)); color:white; box-shadow: 0 8px 20px rgba(10,80,60,0.08); }
+    .btn-ghost { background:transparent; border:1px solid rgba(0,0,0,0.06); color:var(--teal); }
+    .btn-wish { background: transparent; color: #ef476f; border:1px solid rgba(239,71,111,0.12) }
+
+    /* Cart modal */
+    .modal { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background: rgba(0,0,0,0.45); z-index:200; padding:18px; }
+    .modal-card { width:100%; max-width:960px; background:var(--card); padding:16px; border-radius:12px; box-shadow: 0 30px 80px rgba(10,10,10,0.3); max-height:90vh; overflow:auto; }
+    .cart-list { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+    .cart-item { display:flex; gap:12px; align-items:center; padding:8px; border-radius:8px; background:linear-gradient(180deg,#fff,#fbfffb); }
+    .cart-item img { width:80px; height:60px; object-fit:cover; border-radius:8px; }
+
+    /* Orders */
+    .orders-list { display:flex; flex-direction:column; gap:8px; }
+    .order-card { display:flex; justify-content:space-between; gap:12px; padding:12px; border-radius:10px; background:linear-gradient(180deg,#fff,#fbfffb); }
+
+    /* Footer */
+    footer { margin-top:18px; text-align:center; color:var(--muted); font-size:13px; }
+
+    /* Tiny helpers */
+    .muted { color:var(--muted); font-size:13px; }
+    .badge { padding:4px 8px; border-radius:999px; font-weight:700; color:white; background:var(--teal); font-size:12px; }
+    .hidden { display:none !important; }
+    a { color:inherit; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <div class="logo">EF</div>
+        <div>
+          <h1>EcoFinds Marketplace</h1>
+          <div class="small-muted">Buy & sell second-hand — track your eco impact</div>
+        </div>
+      </div>
+
+      <div class="nav" style="align-items:center">
+        <div class="search-bar" role="search" aria-label="Search products">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#2c7a7b" stroke-width="2" stroke-linecap="round"/></svg>
+          <input id="search" placeholder="Search products, e.g. phone" autocomplete="off">
+          <div id="suggestions" class="hidden" style="position:absolute;background:var(--card);margin-top:44px;border-radius:8px;box-shadow:var(--shadow);max-width:420px;padding:6px;z-index:40"></div>
+        </div>
+
+        <button class="icon-btn" id="toggleDark" title="Toggle dark mode">🌙</button>
+
+        <div class="notify-bell">
+          <button class="icon-btn" id="btnNotifications" title="Notifications">🔔</button>
+          <div id="notifyDropdown" class="hidden" style="position:absolute;right:0;margin-top:44px;background:var(--card);padding:10px;border-radius:10px;box-shadow:var(--shadow);min-width:220px">No notifications</div>
+          <div class="notify-badge hidden" id="notifyBadge">0</div>
+        </div>
+
+        <div id="navLoggedOut">
+          <button class="btn btn-ghost" id="btnOpenAuth">Login / Sign up</button>
+        </div>
+
+        <div id="navLoggedIn" class="hidden profile-mini">
+          <div style="text-align:right;margin-right:6px">
+            <div style="font-weight:700" id="navUser">User</div>
+            <div class="small-muted" id="navEmail">email@example.com</div>
+          </div>
+          <div class="avatar" id="navAvatar">U</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main layout -->
+    <div class="main">
+      <!-- LEFT: controls -->
+      <aside class="left">
+        <div class="panel profile-card" id="profileCard">
+          <div style="display:flex;gap:12px;align-items:center">
+            <div class="avatar" id="profileAvatar">U</div>
+            <div class="profile-info">
+              <div class="name" id="profileName">Guest User</div>
+              <div class="small-muted" id="profileEmail">Not logged in</div>
+              <div class="profile-actions">
+                <button class="btn btn-ghost" id="btnEditProfile">Edit</button>
+                <button class="btn btn-ghost hidden" id="btnViewOrders">Orders</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="eco-meter" aria-hidden="true">
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div><strong>Your Eco Impact</strong></div>
+              <div class="small-muted" id="ecoCountTxt">0 kg</div>
+            </div>
+            <div class="bar" style="margin-top:8px">
+              <div class="fill" id="ecoFill">0 kg</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px">
+          <div class="section-title">Categories <span class="muted">Tap to filter</span></div>
+          <div class="categories" id="categoriesGrid"></div>
+          <div style="margin-top:10px; display:flex; gap:8px;">
+            <button class="btn btn-ghost" id="btnClearFilter">Clear</button>
+            <button class="btn" id="btnAddListingLeft">+ Add Listing</button>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top:12px">
+          <div class="section-title">Quick Tools</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn btn-ghost" id="btnMyListingsLeft">My Listings</button>
+            <button class="btn btn-ghost" id="btnCartTop">Cart (<span id="topCartCount">0</span>)</button>
+            <button class="btn btn-ghost" id="btnQuickBuy"></button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- RIGHT: main content -->
+      <section>
+        <!-- Featured -->
+        <div class="panel">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-weight:700">Featured</div>
+              <div class="small-muted">Top picks for you</div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center">
+              <button class="icon-btn" id="featPrev">◀</button>
+              <button class="icon-btn" id="featNext">▶</button>
+            </div>
+          </div>
+
+          <div style="margin-top:12px" class="featured">
+            <div class="carousel" id="carousel"></div>
+          </div>
+        </div>
+
+        <!-- Products Controls -->
+        <div style="margin-top:12px" class="product-controls">
+          <div class="filters">
+            <select id="filterCategory"><option value="">All categories</option></select>
+            <select id="filterPrice"><option value="">Price</option><option value="low">Low → High</option><option value="high">High → Low</option></select>
+            <select id="filterRating"><option value="">Rating</option><option value="4">4★ & up</option><option value="3">3★ & up</option></select>
+            <button class="btn btn-ghost" id="btnFiltersReset">Reset</button>
+          </div>
+
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="muted" id="resultsTxt">Showing <span id="resultsCount">0</span> products</div>
+            <div style="width:16px"></div>
+          </div>
+        </div>
+
+        <!-- Product grid -->
+        <div class="grid" id="productGrid"></div>
+
+        <!-- Orders & Empty -->
+        <div id="ordersEmpty" class="panel hidden" style="margin-top:12px">
+          <div style="font-weight:700">No orders yet</div>
+          <div class="small-muted">Your purchases will appear here after checkout.</div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <div>© <strong>EcoFinds</strong> — Built with ♻️ for sustainability</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <a class="muted" href="#" title="About">About</a>
+          <a class="muted" href="#" title="Contact">Contact</a>
+          <a class="muted" href="#" title="Twitter">Twitter</a>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <!-- Modal root (for cart, auth, add listing, view product) -->
+  <div id="modalRoot" class="hidden"></div>
+
+  <script>
+  /**************************************************************
+   * EcoFinds Dashboard - Vanilla JS Single-file App
+   * - LocalStorage-based persistence for users, listings, cart, purchases
+   * - Features: auth modal, add/edit listing, featured carousel,
+   *   categories, filters, live search suggestions, cart modal,
+   *   checkout with eco-meter animation, dark mode, wishlist
+   **************************************************************/
+
+  /* --------------------
+     Constants & storage keys
+     -------------------- */
+  const CATEGORIES = ['Electronics','Clothing','Books','Furniture','Appliances','Other'];
+  const ECO_SAVINGS = { Electronics:50, Clothing:6, Books:2, Furniture:85, Appliances:40, Other:10 };
+
+  const KEY_USERS = 'ef_users_v2';
+  const KEY_SESS = 'ef_session_v2';
+  const KEY_LISTS = 'ef_listings_v2';
+  const KEY_CART = 'ef_cart_v2';
+  const KEY_PUR = 'ef_purchases_v2';
+  const KEY_WISH = 'ef_wish_v2';
+  const KEY_NOTIF = 'ef_notif_v2';
+
+  /* --------------------
+     DOM refs
+     -------------------- */
+  const searchEl = document.getElementById('search');
+  const suggestionsEl = document.getElementById('suggestions');
+  const btnOpenAuth = document.getElementById('btnOpenAuth');
+  const navLoggedOut = document.getElementById('navLoggedOut');
+  const navLoggedIn = document.getElementById('navLoggedIn');
+  const navUser = document.getElementById('navUser');
+  const navEmail = document.getElementById('navEmail');
+  const navAvatar = document.getElementById('navAvatar');
+  const profileName = document.getElementById('profileName');
+  const profileEmail = document.getElementById('profileEmail');
+  const profileAvatar = document.getElementById('profileAvatar');
+  const ecoFill = document.getElementById('ecoFill');
+  const ecoCountTxt = document.getElementById('ecoCountTxt');
+  const categoriesGrid = document.getElementById('categoriesGrid');
+  const carousel = document.getElementById('carousel');
+  const productGrid = document.getElementById('productGrid');
+  const filterCategory = document.getElementById('filterCategory');
+  const filterPrice = document.getElementById('filterPrice');
+  const filterRating = document.getElementById('filterRating');
+  const resultsCount = document.getElementById('resultsCount');
+  const modalRoot = document.getElementById('modalRoot');
+  const btnAddListingLeft = document.getElementById('btnAddListingLeft');
+  const btnCartTop = document.getElementById('btnCartTop');
+  const topCartCount = document.getElementById('topCartCount');
+  const btnQuickBuy = document.getElementById('btnQuickBuy');
+  const btnOpenNotif = document.getElementById('btnNotifications');
+  const notifyDropdown = document.getElementById('notifyDropdown');
+  const notifyBadge = document.getElementById('notifyBadge');
+  const btnToggleDark = document.getElementById('toggleDark');
+  const featPrev = document.getElementById('featPrev');
+  const featNext = document.getElementById('featNext');
+  const resultsTxt = document.getElementById('resultsTxt');
+  const btnMyListingsLeft = document.getElementById('btnMyListingsLeft');
+  const btnViewOrders = document.getElementById('btnViewOrders');
+  const btnCartTop_alt = document.getElementById('btnCartTop');
+
+  /* --------------------
+     Util helpers
+     -------------------- */
+  function uid(prefix='id'){ return prefix + '_' + Math.random().toString(36).slice(2,9); }
+  function now(){ return new Date().toISOString(); }
+  function readJSON(key, fallback){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
+  function writeJSON(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
+
+  /* --------------------
+     Storage accessors
+     -------------------- */
+  function getUsers(){ return readJSON(KEY_USERS, []); }
+  function saveUsers(u){ writeJSON(KEY_USERS,u); }
+  function getSession(){ return readJSON(KEY_SESS, null); }
+  function setSession(s){ writeJSON(KEY_SESS,s); }
+  function clearSession(){ localStorage.removeItem(KEY_SESS); }
+  function getListings(){ return readJSON(KEY_LISTS, []); }
+  function saveListings(l){ writeJSON(KEY_LISTS,l); }
+  function getCart(){ return readJSON(KEY_CART, {}); } // map userId -> [ {id,qty} ]
+  function saveCart(c){ writeJSON(KEY_CART,c); }
+  function getPurchases(){ return readJSON(KEY_PUR, {}); } // map userId -> [ purchase items ]
+  function savePurchases(p){ writeJSON(KEY_PUR,p); }
+  function getWish(){ return readJSON(KEY_WISH, {}); }
+  function saveWish(w){ writeJSON(KEY_WISH,w); }
+  function getNotifs(){ return readJSON(KEY_NOTIF, []); }
+  function saveNotifs(n){ writeJSON(KEY_NOTIF,n); }
+
+  /* --------------------
+     Bootstrap demo data (only if none)
+     -------------------- */
+  (function bootstrap(){
+    let lists = getListings();
+    if(lists.length === 0){
+      lists = [
+        createListing('iPhone 11 - Good', 'Used but well kept. 64GB. Battery ~85%', 'Electronics', 12000, 4.2, 10),
+        createListing('Wooden Study Table', 'Solid wood desk, minimal scratches', 'Furniture', 3500, 4.6, 3),
+        createListing('Blue Denim Jacket', 'Size M, light wear', 'Clothing', 700, 4.0, 7),
+        createListing('Used Microwave', 'Works well, 20L', 'Appliances', 2200, 4.1, 2),
+        createListing('Second-hand Novels Pack', 'Five classic novels', 'Books', 450, 4.7, 12),
+        createListing('Gaming Headset', 'Good mic, comfy', 'Electronics', 1500, 3.9, 6),
+      ];
+      saveListings(lists);
+    }
+    // notifications
+    if(!getNotifs().length) saveNotifs([{id:uid('N'), text:'Welcome to EcoFinds demo!', date:now(), read:false }]);
+    if(!getCart()) saveCart({});
+    if(!getPurchases()) savePurchases({});
+    if(!getWish()) saveWish({});
+  })();
+
+  /* --------------------
+     Factories
+     -------------------- */
+  function createListing(title, desc, category, price, rating=4.0, stock=5, image=null){
+    return { id: uid('L'), title, desc, category, price, rating, stock, image, created: now() };
+  }
+
+  /* --------------------
+     UI: Render categories
+     -------------------- */
+  function renderCategories(){
+    categoriesGrid.innerHTML = '';
+    CATEGORIES.forEach(c=>{
+      const el = document.createElement('div');
+      el.className = 'cat';
+      el.innerHTML = `<div style="display:flex;align-items:center;gap:10px"><div class="emoji">${emojiFor(c)}</div><div style="font-weight:700">${c}</div></div>`;
+      el.onclick = () => { filterByCategory(c); };
+      categoriesGrid.appendChild(el);
+
+      // also populate filter select
+      const opt = document.createElement('option'); opt.value = c; opt.textContent = c;
+      filterCategory.appendChild(opt);
+    });
+  }
+
+  function emojiFor(cat){
+    return { Electronics:'📱', Clothing:'👗', Books:'📚', Furniture:'🪑', Appliances:'🔌', Other:'🛍️' }[cat] || '🛍️';
+  }
+
+  /* --------------------
+     Featured carousel
+     -------------------- */
+  let carouselIndex = 0;
+  function renderCarousel(){
+    const lists = getListings().slice(0,8);
+    carousel.innerHTML = '';
+    lists.forEach(l=>{
+      const el = document.createElement('div');
+      el.className = 'feat-card';
+      const img = l.image ? `<img src="${l.image}" alt="${escapeHtml(l.title)}">` : `<div style="height:120px;border-radius:8px;background:linear-gradient(135deg,#eefaf5,#ddf6ee);display:flex;align-items:center;justify-content:center;color:var(--muted)">${l.title}</div>`;
+      el.innerHTML = `${img}
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-weight:700">${escapeHtml(l.title)}</div>
+          <div class="badge">${Math.round((l.rating||4)*10)/10}★</div>
+        </div>
+        <div class="small-muted">${l.category} • ${l.stock} in stock</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+          <div class="price">₹ ${l.price}</div>
+          <div><button class="btn btn-primary" onclick="addToCart('${l.id}')">Add</button></div>
+        </div>
+      `;
+      carousel.appendChild(el);
+    });
+    // start auto-scroll
+    carouselIndex = 0;
+    updateCarousel();
+  }
+
+  function updateCarousel(){
+    const total = Math.max(1, carousel.children.length);
+    const cardWidth = 232; // feat-card approx width incl gap
+    // ensure not to exceed boundaries
+    const offset = Math.min(carouselIndex * (cardWidth + 12), Math.max(0, (carousel.children.length*cardWidth - (window.innerWidth*0.6))));
+    carousel.style.transform = `translateX(-${offset}px)`;
+  }
+
+  document.getElementById('featPrev').onclick = ()=>{ carouselIndex = Math.max(0, carouselIndex - 1); updateCarousel(); };
+  document.getElementById('featNext').onclick = ()=>{ carouselIndex = Math.min(Math.max(0, carousel.children.length-1), carouselIndex + 1); updateCarousel(); };
+  // auto advance
+  setInterval(()=>{ carouselIndex = (carouselIndex+1) % Math.max(1, carousel.children.length); updateCarousel(); }, 5000);
+
+  /* --------------------
+     Products grid render + filters + search
+     -------------------- */
+  let currentFilter = { category:'', price:'', rating:'' };
+  function filterByCategory(cat){
+    currentFilter.category = cat;
+    filterCategory.value = cat;
+    renderProducts();
+  }
+
+  function renderProducts(){
+    const q = (searchEl.value||'').trim().toLowerCase();
+    let lists = getListings().slice();
+
+    // category filter
+    if(currentFilter.category) lists = lists.filter(l => l.category === currentFilter.category);
+    if(filterCategory.value) lists = lists.filter(l => l.category === filterCategory.value);
+    if(filterRating.value) lists = lists.filter(l => (l.rating || 0) >= Number(filterRating.value));
+    if(filterPrice.value === 'low') lists.sort((a,b)=>a.price - b.price);
+    if(filterPrice.value === 'high') lists.sort((a,b)=>b.price - a.price);
+    if(q) lists = lists.filter(l => (l.title||'').toLowerCase().includes(q) || (l.desc||'').toLowerCase().includes(q));
+
+    productGrid.innerHTML = '';
+    if(lists.length === 0) {
+      productGrid.innerHTML = `<div style="grid-column:1/-1" class="panel">No products found.</div>`;
+    } else {
+      lists.forEach(l => productGrid.appendChild(createProductCard(l)));
+    }
+    resultsCount.textContent = lists.length;
+    updateCartCount();
+  }
+
+  function createProductCard(l){
+    const div = document.createElement('div');
+    div.className = 'product';
+    div.innerHTML = `
+      ${ l.image ? `<img src="${l.image}" alt="${escapeHtml(l.title)}">` : `<div style="height:140px;border-radius:8px;background:linear-gradient(135deg,#eefaf5,#ddf6ee);display:flex;align-items:center;justify-content:center;color:var(--muted)">${escapeHtml(l.title)}</div>` }
+      <div class="title">${escapeHtml(l.title)}</div>
+      <div class="small-muted">${escapeHtml(l.desc || '')}</div>
+      <div class="meta">
+        <div class="rating">${renderStars(l.rating)} <span class="small-muted">${(l.rating||0).toFixed(1)}</span></div>
+        <div class="price">₹ ${l.price}</div>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div class="small-muted">${l.stock > 0 ? l.stock + ' in stock' : '<span style="color:var(--danger)">Out of stock</span>'}</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-wish" title="Wishlist" onclick="toggleWish('${l.id}', this)">♡</button>
+          <button class="btn btn-ghost" onclick="openProductModal('${l.id}')">View</button>
+          <button class="btn btn-primary" ${l.stock>0 ? '' : 'disabled'} onclick="addToCart('${l.id}')">Add to Cart</button>
+        </div>
+      </div>
+    `;
+    return div;
+  }
+
+  function renderStars(rating = 4){
+    rating = Math.round((rating||0)*2)/2; // half-star steps
+    let out = '';
+    for(let i=1;i<=5;i++){
+      if(rating >= i) out += '★';
+      else if(rating + 0.5 === i) out += '☆';
+      else out += '☆';
+    }
+    return `<span style="color:#f6b93b">${out}</span>`;
+  }
+
+  /* --------------------
+     Live search suggestions
+     -------------------- */
+  let suggestionTimeout = null;
+  searchEl.addEventListener('input', (e)=>{
+    const q = (e.target.value||'').trim();
+    if(suggestionTimeout) clearTimeout(suggestionTimeout);
+    suggestionTimeout = setTimeout(()=> showSuggestions(q), 180);
+    renderProducts();
+  });
+
+  function showSuggestions(q){
+    if(!q){ suggestionsEl.classList.add('hidden'); suggestionsEl.innerHTML=''; return; }
+    const lists = getListings().filter(l => (l.title||'').toLowerCase().includes(q.toLowerCase()) ).slice(0,6);
+    if(lists.length === 0){ suggestionsEl.classList.add('hidden'); suggestionsEl.innerHTML=''; return; }
+    suggestionsEl.innerHTML = lists.map(l => `<div class="cat" style="cursor:pointer;padding:8px;margin-bottom:6px" data-id="${l.id}"><div style="font-weight:700">${escapeHtml(l.title)}</div><div class="small-muted">${l.category} • ₹ ${l.price}</div></div>`).join('');
+    suggestionsEl.classList.remove('hidden');
+    suggestionsEl.querySelectorAll('[data-id]').forEach(el=>{
+      el.onclick = ()=> { openProductModal(el.dataset.id); suggestionsEl.classList.add('hidden'); };
+    });
+  }
+
+  document.addEventListener('click', (e)=>{ if(!searchEl.contains(e.target) && !suggestionsEl.contains(e.target)) { suggestionsEl.classList.add('hidden'); } });
+
+  /* --------------------
+     Product modal (view + add sample edit if owner)
+     -------------------- */
+  function openProductModal(id){
+    const l = getListings().find(x => x.id === id);
+    if(!l) return alert('Product not found');
+    const html = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>${escapeHtml(l.title)}</h2>
+        <div><button id="closeModal" class="btn btn-ghost">Close</button></div>
+      </div>
+      <div style="display:grid;grid-template-columns: 1fr 1fr; gap:12px; margin-top:12px">
+        <div>
+          ${ l.image ? `<img src="${l.image}" style="width:100%;height:260px;object-fit:cover;border-radius:8px" />` : `<div class="img-placeholder" style="height:260px;border-radius:8px;background:linear-gradient(135deg,#eefaf5,#ddf6ee);display:flex;align-items:center;justify-content:center">${escapeHtml(l.title)}</div>`}
+        </div>
+        <div>
+          <div style="font-weight:800;font-size:18px;color:var(--teal)">₹ ${l.price}</div>
+          <div class="small-muted" style="margin-top:6px">${l.category} • ${l.stock} in stock</div>
+          <div style="margin-top:10px">${escapeHtml(l.desc)}</div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn btn-primary" id="modalAddToCart">Add to Cart</button>
+            <button class="btn btn-ghost" id="modalWishlist">Wishlist</button>
+          </div>
+        </div>
+      </div>
+    `;
+    openModal(html);
+    document.getElementById('closeModal').onclick = closeModal;
+    document.getElementById('modalAddToCart').onclick = ()=> { addToCart(l.id); closeModal(); };
+    document.getElementById('modalWishlist').onclick = ()=> { toggleWish(l.id); alert('Toggled wishlist'); };
+  }
+
+  /* --------------------
+     Modal helpers
+     -------------------- */
+  function openModal(contentHtml){
+    modalRoot.innerHTML = '';
+    modalRoot.classList.remove('hidden');
+    const modal = document.createElement('div'); modal.className = 'modal';
+    const card = document.createElement('div'); card.className = 'modal-card';
+    card.innerHTML = contentHtml;
+    modal.appendChild(card);
+    modalRoot.appendChild(modal);
+    modal.onclick = (e) => { if(e.target === modal) closeModal(); };
+    // make modal accessible
+    card.querySelectorAll('button, input, textarea').forEach(el=> el.addEventListener('keydown', (ev)=> { if(ev.key==='Escape') closeModal(); }));
+  }
+  function closeModal(){ modalRoot.innerHTML=''; modalRoot.classList.add('hidden'); }
+
+  /* --------------------
+     Cart management & modal
+     -------------------- */
+  function addToCart(listingId){
+    const session = getSession();
+    if(!session) { openAuthModal(); return; }
+    const cart = getCart();
+    const arr = cart[session.userId] || [];
+    const existing = arr.find(x=>x.id===listingId);
+    if(existing){ existing.qty += 1; }
+    else arr.push({ id: listingId, qty: 1 });
+    cart[session.userId] = arr;
+    saveCart(cart);
+    updateCartCount();
+    notify('Added to cart');
+  }
+
+  function removeFromCart(listingId){
+    const session = getSession();
+    if(!session) return;
+    const cart = getCart();
+    const arr = (cart[session.userId] || []).filter(x=>x.id !== listingId);
+    cart[session.userId] = arr;
+    saveCart(cart);
+    updateCartCount();
+  }
+
+  function updateQtyCart(listingId, qty){
+    const session = getSession();
+    if(!session) return;
+    const cart = getCart();
+    const arr = (cart[session.userId] || []);
+    const it = arr.find(x=>x.id===listingId);
+    if(it) it.qty = qty;
+    cart[session.userId] = arr;
+    saveCart(cart);
+    updateCartCount();
+  }
+
+  function openCart(){
+    const session = getSession();
+    if(!session) { openAuthModal(); return; }
+    const cartMap = getCart();
+    const items = (cartMap[session.userId] || []).map(ci => {
+      const listing = getListings().find(l => l.id === ci.id);
+      return { ...listing, qty: ci.qty };
+    }).filter(Boolean);
+    if(items.length === 0){
+      openModal(`<div style="display:flex;justify-content:space-between;align-items:center"><h2>Your Cart</h2><div><button id="closeCart" class="btn btn-ghost">Close</button></div></div><div style="margin-top:12px" class="small-muted">Cart is empty</div>`);
+      document.getElementById('closeCart').onclick = closeModal;
+      return;
+    }
+    let itemsHtml = '';
+    let total = 0;
+    items.forEach(it=>{
+      const sub = (it.price||0) * (it.qty||1);
+      total += sub;
+      itemsHtml += `<div class="cart-item">
+        <img src="${it.image || ''}" onerror="this.style.display='none'">
+        <div style="flex:1">
+          <div style="font-weight:700">${escapeHtml(it.title)}</div>
+          <div class="small-muted">${it.category}</div>
+          <div style="margin-top:6px">Qty: <input type="number" min="1" value="${it.qty}" id="qty_${it.id}" style="width:60px" /></div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:800">₹ ${sub}</div>
+          <div style="margin-top:8px"><button class="btn btn-ghost" id="remove_${it.id}">Remove</button></div>
+        </div>
+      </div>`;
+    });
+
+    const html = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Your Cart</h2>
+        <div><button id="closeCart" class="btn btn-ghost">Close</button></div>
+      </div>
+      <div style="margin-top:12px">${itemsHtml}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+        <div class="small-muted">You save eco points by buying second-hand</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="font-weight:800;font-size:18px">₹ ${total}</div>
+          <button class="btn btn-primary" id="btnCheckout">Checkout</button>
+        </div>
+      </div>
+    `;
+    openModal(html);
+    document.getElementById('closeCart').onclick = closeModal;
+    items.forEach(it=>{
+      const el = document.getElementById('remove_'+it.id);
+      if(el) el.onclick = ()=> { removeFromCart(it.id); closeModal(); openCart(); };
+      const qEl = document.getElementById('qty_'+it.id);
+      if(qEl) qEl.addEventListener('change', (ev)=> { const val = Number(ev.target.value||1); if(val<1) ev.target.value = 1; updateQtyCart(it.id, val); openCart(); });
+    });
+    document.getElementById('btnCheckout').onclick = ()=> { checkout(items); closeModal(); };
+  }
+
+  function checkout(items){
+    const session = getSession(); if(!session) return;
+    const purchases = getPurchases();
+    const userPurchases = purchases[session.userId] || [];
+    const newPurch = items.map(it => ({ id: uid('P'), listingId: it.id, title: it.title, category: it.category, price: it.price, date: now(), qty: it.qty }));
+    purchases[session.userId] = userPurchases.concat(newPurch);
+    savePurchases(purchases);
+    // clear cart
+    const cart = getCart(); cart[session.userId] = []; saveCart(cart); updateCartCount();
+    // update eco meter points
+    incrementEcoPoints(session.userId, newPurch);
+    notify('Purchase completed — thank you!');
+    // create order notification
+    sendNotif(session.userId, `Order placed (${newPurch.length} items)`);
+  }
+
+  /* --------------------
+     Wishlist
+     -------------------- */
+  function toggleWish(listingId, btnEl){
+    const session = getSession();
+    if(!session) { openAuthModal(); return; }
+    const wish = getWish();
+    const arr = wish[session.userId] || [];
+    if(arr.includes(listingId)) {
+      wish[session.userId] = arr.filter(x=>x!==listingId);
+      saveWish(wish);
+      if(btnEl) btnEl.innerText = '♡';
+    } else {
+      arr.push(listingId);
+      wish[session.userId] = arr;
+      saveWish(wish);
+      if(btnEl) btnEl.innerText = '♥';
+    }
+  }
+
+  /* --------------------
+     Orders view
+     -------------------- */
+  function openOrders(){
+    const session = getSession();
+    if(!session) { openAuthModal(); return; }
+    const purchases = (getPurchases()[session.userId] || []);
+    if(purchases.length === 0){
+      openModal(`<div style="display:flex;justify-content:space-between;align-items:center"><h2>Orders</h2><div><button id="closeO" class="btn btn-ghost">Close</button></div></div><div style="margin-top:12px" class="small-muted">No orders yet.</div>`);
+      document.getElementById('closeO').onclick = closeModal;
+      return;
+    }
+    const rows = purchases.slice().reverse().map(p => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px dashed #eef6ec">
+      <div><strong>${escapeHtml(p.title)}</strong><div class="small-muted">${p.category}</div></div>
+      <div style="text-align:right"><div>₹ ${p.price}</div><div class="small-muted">${new Date(p.date).toLocaleString()}</div></div>
+    </div>`).join('');
+    const html = `<div style="display:flex;justify-content:space-between;align-items:center"><h2>Previous Purchases</h2><div><button id="closeO2" class="btn btn-ghost">Close</button></div></div><div style="margin-top:12px">${rows}</div>`;
+    openModal(html);
+    document.getElementById('closeO2').onclick = closeModal;
+  }
+
+  /* --------------------
+     My Listings (user) - modal
+     -------------------- */
+  function openMyListings(){
+    const session = getSession();
+    if(!session) { openAuthModal(); return; }
+    const all = getListings();
+    const mine = all.filter(l => l.owner === session.userId);
+    let html = `<div style="display:flex;justify-content:space-between;align-items:center"><h2>My Listings</h2><div><button id="closeML" class="btn btn-ghost">Close</button></div></div><div style="margin-top:12px">`;
+    if(mine.length === 0) html += `<div class="small-muted">You have no listings. Add one from 'Add Listing'.</div>`;
+    else html += mine.map(m => `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-bottom:1px dashed #eef6ec"><div><strong>${escapeHtml(m.title)}</strong><div class="small-muted">${m.category}</div></div><div><button id="edit_${m.id}" class="btn btn-ghost">Edit</button> <button id="del_${m.id}" class="btn btn-ghost">Delete</button></div></div>`).join('');
+    html += `</div><div style="display:flex;justify-content:flex-end;margin-top:8px"><button id="btnNewList" class="btn">+ New Listing</button></div>`;
+    openModal(html);
+    document.getElementById('closeML').onclick = closeModal;
+    if(document.getElementById('btnNewList')) document.getElementById('btnNewList').onclick = ()=>{ closeModal(); openAddListingModal(); };
+    mine.forEach(m => {
+      const ed = document.getElementById('edit_'+m.id);
+      const del = document.getElementById('del_'+m.id);
+      if(ed) ed.onclick = ()=> { closeModal(); openAddListingModal(m); };
+      if(del) del.onclick = ()=> { if(confirm('Delete listing?')) { deleteListing(m.id); closeModal(); openMyListings(); } };
+    });
+  }
+
+  function deleteListing(id){
+    const lists = getListings().filter(l => l.id !== id);
+    saveListings(lists);
+    renderProducts();
+    renderCarousel();
+  }
+
+  /* --------------------
+     Add/Edit listing modal
+     -------------------- */
+  function openAddListingModal(existing = null){
+    const isEdit = !!existing;
+    const html = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>${ isEdit ? 'Edit Listing' : 'Add Listing' }</h2>
+        <div><button id="closeAdd" class="btn btn-ghost">Close</button></div>
+      </div>
+      <div style="margin-top:12px;display:grid;gap:8px">
+        <input id="fTitle" placeholder="Title" value="${existing?escapeHtml(existing.title):''}" />
+        <select id="fCategory">${ CATEGORIES.map(c => `<option ${ existing && existing.category===c ? 'selected' : '' }>${c}</option>`).join('') }</select>
+        <textarea id="fDesc" placeholder="Description">${ existing?escapeHtml(existing.desc):'' }</textarea>
+        <div class="form-row" style="display:flex;gap:8px">
+          <input id="fPrice" type="number" placeholder="Price" value="${ existing? (existing.price||'') : '' }" />
+          <input id="fStock" type="number" placeholder="Stock" value="${ existing? (existing.stock||1) : 1 }" />
+        </div>
+        <input id="fImage" type="file" accept="image/*" />
+        <div style="display:flex;justify-content:flex-end;gap:8px">
+          <button id="saveListing" class="btn btn-primary">${ isEdit ? 'Save' : 'Create' }</button>
+        </div>
+      </div>
+    `;
+    openModal(html);
+    document.getElementById('closeAdd').onclick = closeModal;
+    document.getElementById('saveListing').onclick = async ()=>{
+      const t = document.getElementById('fTitle').value.trim();
+      const cat = document.getElementById('fCategory').value;
+      const desc = document.getElementById('fDesc').value.trim();
+      const price = Number(document.getElementById('fPrice').value || 0);
+      const stock = Number(document.getElementById('fStock').value || 0);
+      const file = document.getElementById('fImage');
+      let img = existing ? existing.image : null;
+      if(file && file.files && file.files[0]){
+        img = await fileToDataURL(file.files[0]);
+      }
+      const session = getSession();
+      if(!session){ alert('Login to create listing'); closeModal(); openAuthModal(); return; }
+      const lists = getListings();
+      if(isEdit){
+        const idx = lists.findIndex(x=>x.id === existing.id);
+        if(idx >= 0){
+          lists[idx] = {...lists[idx], title:t, desc, category:cat, price, stock, image: img };
+          saveListings(lists); renderProducts(); renderCarousel(); closeModal();
+        }
+      } else {
+        const newL = { id: uid('L'), title:t, desc, category:cat, price, rating:4.2, stock, image: img, created: now(), owner: session.userId };
+        lists.unshift(newL); saveListings(lists); renderProducts(); renderCarousel(); closeModal();
+      }
+    };
+  }
+
+  function fileToDataURL(file){
+    return new Promise((res,rej)=>{
+      const fr = new FileReader();
+      fr.onload = ()=> res(fr.result);
+      fr.onerror = ()=> rej();
+      fr.readAsDataURL(file);
+    });
+  }
+
+  /* --------------------
+     Auth modal (signup/login) simple demo
+     -------------------- */
+  function openAuthModal(){
+    const html = `
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Login / Sign up</h2>
+        <div><button id="closeAuth" class="btn btn-ghost">Close</button></div>
+      </div>
+      <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px">
+        <input id="authEmail" placeholder="Email" />
+        <input id="authPassword" placeholder="Password" type="password" />
+        <div style="display:flex;gap:8px">
+          <button id="btnLogin" class="btn btn-primary">Login</button>
+          <button id="btnSignup" class="btn btn-ghost">Sign up</button>
+        </div>
+        <div class="small-muted">This demo stores credentials locally (not for production).</div>
+      </div>
+    `;
+    openModal(html);
+    document.getElementById('closeAuth').onclick = closeModal;
+    document.getElementById('btnSignup').onclick = ()=> {
+      const email = document.getElementById('authEmail').value.trim();
+      const pass = document.getElementById('authPassword').value;
+      if(!email || !pass){ alert('Enter email & password'); return; }
+      const users = getUsers();
+      if(users.some(u=>u.email === email)){ alert('Email exists. Please login.'); return; }
+      const user = { id: uid('U'), email, password: pass, name: email.split('@')[0], created: now() };
+      users.push(user); saveUsers(users); setSession({ userId: user.id }); refreshNav(); closeModal();
+      notify('Account created and logged in');
+    };
+    document.getElementById('btnLogin').onclick = ()=>{
+      const email = document.getElementById('authEmail').value.trim();
+      const pass = document.getElementById('authPassword').value;
+      const user = getUsers().find(u => u.email === email && u.password === pass);
+      if(!user){ alert('Invalid credentials'); return; }
+      setSession({ userId: user.id }); refreshNav(); closeModal(); notify('Logged in');
+    };
+  }
+
+  /* --------------------
+     Notifications
+     -------------------- */
+  function sendNotif(userId, text){
+    const notifs = getNotifs();
+    notifs.unshift({ id: uid('N'), text, date: now(), read:false });
+    saveNotifs(notifs);
+    renderNotifs();
+  }
+
+  function notify(text){
+    const notifs = getNotifs();
+    notifs.unshift({id:uid('N'), text, date: now(), read:false});
+    saveNotifs(notifs);
+    renderNotifs();
+    // small toast
+    const t = document.createElement('div'); t.style.cssText = 'position:fixed;right:20px;bottom:20px;background:var(--teal);color:white;padding:10px;border-radius:8px;box-shadow:var(--shadow);z-index:999';
+    t.textContent = text; document.body.appendChild(t);
+    setTimeout(()=> t.remove(), 1800);
+  }
+
+  function renderNotifs(){
+    const arr = getNotifs();
+    const unread = arr.filter(n=>!n.read).length;
+    notifyBadge.textContent = String(unread);
+    if(unread>0) notifyBadge.classList.remove('hidden'); else notifyBadge.classList.add('hidden');
+    if(arr.length === 0) notifyDropdown.innerHTML = '<div class="small-muted">No notifications</div>';
+    else notifyDropdown.innerHTML = arr.slice(0,8).map(n => `<div style="padding:8px;border-bottom:1px dashed #eef6ef"><div>${escapeHtml(n.text)}</div><div class="small-muted" style="margin-top:4px">${new Date(n.date).toLocaleString()}</div></div>`).join('');
+  }
+
+  btnOpenNotif.addEventListener('click', ()=>{
+    notifyDropdown.classList.toggle('hidden');
+  });
+
+  /* --------------------
+     Nav / session UI refresh
+     -------------------- */
+  function refreshNav(){
+    const s = getSession();
+    if(s && s.userId){
+      navLoggedOut.classList.add('hidden'); navLoggedIn.classList.remove('hidden');
+      const u = getUsers().find(x=>x.id===s.userId) || { name:'User', email:'user@local' };
+      navUser.textContent = u.name;
+      navEmail.textContent = u.email;
+      navAvatar.textContent = (u.name||u.email)[0].toUpperCase();
+      profileName.textContent = u.name || u.email;
+      profileEmail.textContent = u.email;
+      profileAvatar.textContent = (u.name||u.email)[0].toUpperCase();
+      document.getElementById('btnMyListingsLeft').classList.remove('hidden');
+      document.getElementById('btnViewOrders').classList.remove('hidden');
+    } else {
+      navLoggedOut.classList.remove('hidden'); navLoggedIn.classList.add('hidden');
+      profileName.textContent = 'Guest User';
+      profileEmail.textContent = 'Not logged in';
+      profileAvatar.textContent = 'G';
+    }
+    renderNotifs();
+    updateCartCount();
+    renderProducts();
+    renderCarousel();
+    updateEcoMeter();
+  }
+
+  /* --------------------
+     Eco meter management
+     -------------------- */
+  function updateEcoMeter(){
+    const s = getSession();
+    let total = 0;
+    if(s && s.userId){
+      const purchases = (getPurchases()[s.userId] || []);
+      for(let i=0;i<purchases.length;i++){
+        const p = purchases[i];
+        total += (ECO_SAVINGS[p.category] || ECO_SAVINGS.Other || 0);
+      }
+    }
+    ecoCountTxt.textContent = `${Math.round(total)} kg`;
+    // animate fill width proportionally (cap at 100%)
+    const percent = Math.min(100, Math.round((total/500) * 100)); // arbitrary scale: 500kg = 100%
+    ecoFill.style.width = percent + '%';
+    ecoFill.textContent = `${Math.round(total)} kg`;
+  }
+
+  function incrementEcoPoints(userId, purchases){
+    // purchases: array of purchased items
+    // we add notifications and animate meter
+    const totalAdd = purchases.reduce((acc,p)=> acc + (ECO_SAVINGS[p.category] || ECO_SAVINGS.Other || 0), 0);
+    // simple approach: show animation by temporarily increasing purchases list
+    // (we already saved purchases in checkout), so just update meter and show toast
+    updateEcoMeter();
+    const t = document.createElement('div'); t.style.cssText = 'position:fixed;left:20px;bottom:20px;background:var(--green);color:white;padding:10px;border-radius:8px;box-shadow:var(--shadow);z-index:999';
+    t.textContent = `Eco points +${totalAdd} kg — thank you!`; document.body.appendChild(t);
+    setTimeout(()=> t.remove(), 2400);
+  }
+
+  /* --------------------
+     Cart count update
+     -------------------- */
+  function updateCartCount(){
+    const s = getSession();
+    if(!s){ topCartCount.textContent = '0'; return; }
+    const arr = getCart()[s.userId] || [];
+    const totalQty = arr.reduce((acc,it)=> acc + (it.qty||0), 0);
+    topCartCount.textContent = String(totalQty);
+    document.getElementById('topCartCount').textContent = String(totalQty);
+  }
+
+  /* --------------------
+     Quick demo buy flow
+     -------------------- */
+  function quickBuyDemo(){
+    // create demo user if not exists
+    let users = getUsers();
+    let demo = users.find(u=>u.email==='demo@ecofinds.local');
+    if(!demo){
+      demo = { id: uid('U'), email: 'demo@ecofinds.local', password: 'demo', name: 'DemoUser', created: now() };
+      users.push(demo); saveUsers(users);
+    }
+    setSession({ userId: demo.id });
+    refreshNav();
+    // add first listing to cart
+    const lists = getListings();
+    if(lists.length === 0) return alert('No listings');
+    const first = lists[0];
+    const cart = getCart(); cart[demo.id] = [{ id: first.id, qty:1 }]; saveCart(cart);
+    updateCartCount();
+    openCart();
+  }
+
+  /* --------------------
+     Notifications on page load
+     -------------------- */
+  function renderInitial(){
+    renderCategories();
+    renderCarousel();
+    renderProducts();
+    renderNotifs();
+    refreshNav();
+  }
+
+  /* --------------------
+     Helpers
+     -------------------- */
+  function escapeHtml(s=''){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  /* --------------------
+     Event wiring
+     -------------------- */
+  btnOpenAuth.onclick = openAuthModal;
+  btnAddListingLeft.onclick = ()=> { openAddListingModal(null); };
+  btnCartTop.onclick = openCart;
+  btnCartTop_alt && (btnCartTop_alt.onclick = openCart);
+  btnQuickBuy.onclick = quickBuyDemo;
+  btnMyListingsLeft.onclick = openMyListings;
+  btnViewOrders.onclick = openOrders;
+  document.getElementById('btnClearFilter').onclick = ()=>{
+    currentFilter = { category:'', price:'', rating:'' };
+    filterCategory.value = ''; filterPrice.value = ''; filterRating.value = '';
+    renderProducts();
+  };
+  document.getElementById('btnFiltersReset').onclick = ()=>{ filterCategory.value=''; filterPrice.value=''; filterRating.value=''; renderProducts(); };
+  filterCategory.onchange = ()=> renderProducts();
+  filterPrice.onchange = ()=> renderProducts();
+  filterRating.onchange = ()=> renderProducts();
+
+  document.getElementById('btnOpenAuth').onclick = openAuthModal;
+  document.getElementById('btnCartTop').onclick = openCart;
+
+  document.getElementById('btnEditProfile').onclick = ()=> {
+    const s = getSession();
+    if(!s){ openAuthModal(); return; }
+    // quick inline edit modal
+    const u = getUsers().find(x => x.id === s.userId);
+    openModal(`<div style="display:flex;justify-content:space-between;align-items:center"><h2>Edit Profile</h2><div><button id="closeEdit" class="btn btn-ghost">Close</button></div></div>
+      <div style="margin-top:12px;display:grid;gap:8px">
+        <input id="uName" value="${escapeHtml(u.name||'')}" />
+        <input id="uEmail" value="${escapeHtml(u.email||'')}" />
+        <div style="display:flex;gap:8px;justify-content:flex-end"><button id="saveProfile" class="btn btn-primary">Save</button></div>
+      </div>`);
+    document.getElementById('closeEdit').onclick = closeModal;
+    document.getElementById('saveProfile').onclick = ()=> {
+      const name = document.getElementById('uName').value.trim();
+      const email = document.getElementById('uEmail').value.trim();
+      if(!name || !email) { alert('Enter values'); return; }
+      const users = getUsers();
+      const idx = users.findIndex(x=>x.id===u.id);
+      if(idx>=0){ users[idx].name = name; users[idx].email = email; saveUsers(users); setSession({ userId: u.id }); refreshNav(); closeModal(); notify('Profile updated'); }
+    };
+  };
+
+  /* Dark mode toggle */
+  btnToggleDark.onclick = ()=>{
+    document.body.classList.toggle('dark');
+    btnToggleDark.textContent = document.body.classList.contains('dark') ? '☀️' : '🌙';
+  };
+
+  /* Simple keyboard: '/' focuses search */
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA'){ e.preventDefault(); searchEl.focus(); }
+  });
+
+  // global exposure for debugging in console
+  window.__ef = { getListings, getUsers, getCart, getPurchases, addToCart, openCart, openAuthModal };
+
+  // initial render
+  renderInitial();
+  </script>
+</body>
+</html>
