@@ -1,1 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>EcoFinds - Login</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f8; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
+    .form-card { background:white; padding:2rem; width:300px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
+    .form-card h2 { color:#2c7a7b; margin-bottom:1rem; }
+    input { width:100%; padding:0.75rem; margin:0.5rem 0; border:1px solid #ddd; border-radius:8px; }
+    button { width:100%; padding:0.75rem; margin-top:1rem; border:none; border-radius:8px; background:#2c7a7b; color:white; font-size:16px; font-weight:bold; cursor:pointer; }
+    button:hover { background:#245f60; }
+  </style>
+</head>
+<body>
+  <div class="form-card">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="password" id="password" placeholder="Password" required>
+    <button id="loginBtn">Login</button>
+    <p style="margin-top:1rem;font-size:14px">Don’t have an account? <a href="front.html">Register</a></p>
+  </div>
 
+  <script>
+    function readJSON(key, fallback){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
+    function writeJSON(key,val){ localStorage.setItem(key,JSON.stringify(val)); }
+
+    const KEY_USERS = 'ef_users_v2';
+    const KEY_SESS = 'ef_session_v2';
+
+    document.getElementById("loginBtn").addEventListener("click", () => {
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value;
+
+      if(!email || !password){ alert("Enter email and password"); return; }
+
+      let users = readJSON(KEY_USERS, []);
+      const user = users.find(u=>u.email===email && u.password===password);
+      if(!user){ alert("Invalid credentials"); return; }
+
+      writeJSON(KEY_SESS, { userId: user.id }); // save session
+      window.location.href = "like.html"; // go to dashboard
+    });
+  </script>
+</body>
+</html>
