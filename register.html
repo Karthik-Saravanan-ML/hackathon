@@ -5,8 +5,9 @@
   <style>
     body { font-family: Arial, sans-serif; background:#f4f6f8; display:flex; justify-content:center; align-items:center; height:100vh; margin:0; }
     .form-card { background:white; padding:2rem; width:300px; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.1); }
-    .form-card h2 { color:#2c7a7b; margin-bottom:1rem; }
+    .form-card h2 { color:hsl(181, 47%, 33%); margin-bottom:1rem; }
     input { width:100%; padding:0.75rem; margin:0.5rem 0; border:1px solid #ddd; border-radius:8px; }
+    .error { color:red; font-size:12px; margin:0; display:none; text-align:left; }
     button { width:100%; padding:0.75rem; margin-top:1rem; border:none; border-radius:8px; background:#2c7a7b; color:white; font-size:16px; font-weight:bold; cursor:pointer; }
     button:hover { background:#245f60; }
   </style>
@@ -14,11 +15,20 @@
 <body>
   <div class="form-card">
     <h2>Register</h2>
-    <input type="text" id="username" placeholder="Username" required>
-    <input type="email" id="email" placeholder="Email" required>
-    <input type="password" id="password" placeholder="Password" required>
+    <div>
+      <input type="text" id="username" placeholder="Username" required>
+      <p class="error" id="usernameError">Username is required</p>
+    </div>
+    <div>
+      <input type="email" id="email" placeholder="Email" required>
+      <p class="error" id="emailError">Email is required</p>
+    </div>
+    <div>
+      <input type="password" id="password" placeholder="Password" required>
+      <p class="error" id="passwordError">Password is required</p>
+    </div>
     <button id="registerBtn">Register</button>
-    <p style="margin-top:1rem;font-size:14px">Already registered? <a href="regs.html">Login</a></p>
+    <p style="margin-top:1rem;font-size:14px">Already registered? <a href="login.html">Login</a></p>
   </div>
 
   <script>
@@ -29,23 +39,53 @@
     const KEY_USERS = 'ef_users_v2';
     const KEY_SESS = 'ef_session_v2';
 
-    document.getElementById("registerBtn").addEventListener("click", () => {
-      const username = document.getElementById("username").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
+    const usernameEl = document.getElementById("username");
+    const emailEl = document.getElementById("email");
+    const passwordEl = document.getElementById("password");
 
-      if(!username || !email || !password){ alert("All fields required"); return; }
+    const usernameError = document.getElementById("usernameError");
+    const emailError = document.getElementById("emailError");
+    const passwordError = document.getElementById("passwordError");
+
+    document.getElementById("registerBtn").addEventListener("click", () => {
+      let valid = true;
+
+      // reset errors
+      usernameError.style.display = "none";
+      emailError.style.display = "none";
+      passwordError.style.display = "none";
+
+      const username = usernameEl.value.trim();
+      const email = emailEl.value.trim();
+      const password = passwordEl.value;
+
+      if(!username){ usernameError.textContent = "Username is required"; usernameError.style.display = "block"; valid = false; }
+      if(!email){ emailError.textContent = "Email is required"; emailError.style.display = "block"; valid = false; }
+      if(!password){ passwordError.textContent = "Password is required"; passwordError.style.display = "block"; valid = false; }
+
+      if(!valid) return;
 
       let users = readJSON(KEY_USERS, []);
-      if(users.some(u=>u.email===email)){ alert("Email already registered. Please login."); return; }
+      if(users.some(u=>u.email===email)){
+        emailError.textContent = "Email already registered. Please login.";
+        emailError.style.display = "block";
+        return;
+      }
 
       const user = { id: uid('U'), name: username, email, password, created: new Date().toISOString() };
       users.push(user); writeJSON(KEY_USERS, users);
 
       writeJSON(KEY_SESS, { userId: user.id }); // auto login
-      window.location.href = "like.html"; // go to dashboard
+      window.location.href = "like.txt"; // go to dashboard
+    });
+
+    // hide error while typing
+    [usernameEl, emailEl, passwordEl].forEach(input => {
+      input.addEventListener("input", () => {
+        const errorEl = input.nextElementSibling;
+        if(errorEl) errorEl.style.display = "none";
+      });
     });
   </script>
 </body>
 </html>
-
